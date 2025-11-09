@@ -7,7 +7,7 @@
 ### Key Features
 **Interactive 3D Orbital Tracking**: Experience a real-time simulation of a satellite orbiting Earth using **Three.js**, complete with smooth camera controls.
 
-**📖 Dynamic Mission Storylines**: Explore ISRO’s milestones through a clean tabbed interface featuring missions like **Chandrayaan-3**, **Mangalyaan**, and **Gaganyaan**, with technical details simplified for learners.
+**Dynamic Mission Storylines**: Explore ISRO’s milestones through a clean tabbed interface featuring missions like **Chandrayaan-3**, **Mangalyaan**, and **Gaganyaan**, with technical details simplified for learners.
 
 **Educational Focus Metrics**: Every mission highlights core learning aspects — **Trajectory**, **Engineering**, **History**, and **Objectives** — making it ideal for students and educators.
 
@@ -30,6 +30,3 @@ Styling: Tailwind CSS
 **Backend Integration**: Connect with **Firebase/Firestore** to save user-built rockets, progress, and learning achievements.
 
 Made by, Nidhi Rathod
-
-Would you like me to make it sound a bit more **startup-style** (so it feels pitch-ready and not just academic)? I can rewrite it to make it feel like a *pre-launch tech product page* instead of a student prototype.
-
