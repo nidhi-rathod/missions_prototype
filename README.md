@@ -15,8 +15,8 @@
 
 ### Technology Stack
 
-Component                                        
-Frontend: HTML5 + JavaScript (ES6+)                       
+                                       
+Frontend: HTML5 + JavaScript                       
 Styling: Tailwind CSS 
 3D Visualization: Three.js orbital simulation                    
 
