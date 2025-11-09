@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Raven | India's Space Education Hub & Mission Stories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- THREE.js Library for 3D Visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0d12; /* Near-black background */
+        }
+        .hero-gradient {
+            /* Subtle orange/red glow from the top to represent Indian flag/sunset */
+            background: radial-gradient(circle at top, rgba(255, 140, 0, 0.1), #0c0d12 70%); 
+        }
+        /* New educational focus CTA glow (Saffron/Orange) */
+        .cta-glow {
+            animation: pulse-glow 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 140, 0, 0.4), 0 0 25px rgba(255, 140, 0, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(255, 140, 0, 0.6), 0 0 30px rgba(255, 140, 0, 0.4); }
+        }
+
+        /* Simulator Styles - for the future rocket builder */
+        .simulator-grid {
+            min-height: 500px;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 24px;
+        }
+        .parts-sidebar {
+            background-color: #1a1a2e;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #3f3f5a;
+        }
+        .assembly-area {
+            background-color: #1a1a2e;
+            border-radius: 12px;
+            border: 2px dashed #4a4a6e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #8b8bb0;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- Header & Navigation -->
+    <header class="p-4 md:p-6 sticky top-0 z-50 bg-[#0c0d12]/90 backdrop-blur-sm shadow-xl shadow-orange-900/10">
+        <nav class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <!-- NEW LOGO: Orbit Icon for Education/Space -->
+                <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 009-9H3a9 9 0 009 9z" opacity="0.4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zM12 12v9"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18"/>
+                </svg>
+                <span class="text-2xl font-extrabold tracking-widest uppercase text-slate-100">Raven</span>
+            </div>
+            <a href="#simulator" class="px-4 py-2 bg-orange-600 text-slate-900 hover:bg-orange-500 rounded-full font-bold transition duration-300 shadow-md shadow-orange-500/30 cta-glow">
+                Build Your Rocket
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-gradient pt-16 pb-24 text-center">
+            <div class="max-w-4xl mx-auto px-6">
+                <h1 class="text-5xl md:text-7xl font-extrabold mb-4 leading-tight">
+                    <span class="text-orange-400">ISRO</span>: The Story of India's Journey to Space
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto">
+                    Dive into the technology and stories of ISRO's triumphs. We deliver complex space missions—from Chandrayaan's soft landing to the Gaganyaan trajectory—through accessible, engaging narratives for everyone.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#portfolio" class="px-8 py-3 bg-teal-500 text-slate-900 font-bold rounded-xl text-lg hover:bg-teal-400 transition duration-300 shadow-xl shadow-teal-500/40">
+                        Explore Mission Stories
+                    </a>
+                    <a href="#simulator" class="px-8 py-3 bg-slate-800 text-orange-400 font-semibold rounded-xl text-lg hover:bg-slate-700 transition duration-300 border border-orange-600/50">
+                        Launch Your Own Satellite
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Snapshot (3D Visualization - now for Mission Tracking) -->
+        <section class="-mt-16 mb-20 px-4">
+            <div class="max-w-6xl mx-auto rounded-xl overflow-hidden shadow-2xl border-4 border-slate-700/50">
+                <div class="bg-slate-900 p-4 md:p-8 relative">
+                    <div class="flex flex-col sm:flex-row justify-between items-center text-sm text-slate-400 mb-4">
+                        <span id="mission-title-header" class="bg-orange-900 text-orange-300 px-3 py-1 rounded-full text-xs font-mono tracking-wider">LIVE MISSION TRACKER (SIMULATED)</span>
+                        <span id="mission-status-header" class="mt-2 sm:mt-0">CURRENTLY TRACKING: CHANDRAYAAN ORBIT | T+ 00:00:00</span>
+                    </div>
+                    
+                    <!-- Main Simulation View Container (for Three.js) -->
+                    <div id="three-container" class="bg-slate-950 h-96 flex items-center justify-center rounded-lg border-2 border-orange-500/30 relative overflow-hidden">
+                        
+                        <!-- Loading Indicator (Hidden after Three.js loads) -->
+                        <div id="loading-message" class="absolute inset-0 flex items-center justify-center text-lg text-orange-400 font-mono bg-slate-950/80 z-10">
+                            Initializing 3D Orbital Model...
+                        </div>
+
+                        <!-- Data Overlay (Mock) - Remains on top of the 3D scene -->
+                        <div id="data-overlay" class="absolute bottom-4 left-4 p-4 bg-slate-900/90 rounded-lg text-xs font-mono border border-orange-700/50 z-20">
+                            <!-- Data populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <p class="mt-4 text-center text-sm text-slate-500">
+                        *Interactive model showing basic orbital mechanics. Click and drag to rotate the camera.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Educational Metrics/Focus Section (Replaced old corporate metrics) -->
+        <section id="focus" class="py-20 px-4">
+            <div class="max-w-7xl mx-auto text-center">
+                <span class="text-orange-400 font-semibold uppercase tracking-widest mb-3 block">OUR EDUCATIONAL FOCUS</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold mb-12">Learn the Science Behind the Stories</h2>
+                
+                <div class="grid md:grid-cols-4 gap-8">
+                    <!-- Focus 1: Trajectory/Physics -->
+                    <div class="p-6 bg-slate-900 rounded-xl shadow-xl border-b-4 border-b-red-400 transition hover:bg-slate-800">
+                        <p class="text-5xl font-extrabold text-red-400 mb-2">Path</p>
+                        <p class="font-bold text-lg text-slate-200">Trajectory & Orbit</p>
+                        <p class="text-sm text-slate-400">See the exact path and forces governing each mission's journey.</p>
+                    </div>
+
+                    <!-- Focus 2: Engineering -->
+                    <div class="p-6 bg-slate-900 rounded-xl shadow-xl border-b-4 border-b-orange-400 transition hover:bg-slate-800">
+                        <p class="text-5xl font-extrabold text-orange-400 mb-2">Build</p>
+                        <p class="font-bold text-lg text-slate-200">Rocket Construction</p>
+                        <p class="text-sm text-slate-400">Understand the stages, components, and purpose of each part.</p>
+                    </div>
+
+                    <!-- Focus 3: History -->
+                    <div class="p-6 bg-slate-900 rounded-xl shadow-xl border-b-4 border-b-yellow-400 transition hover:bg-slate-800">
+                        <p class="text-5xl font-extrabold text-yellow-400 mb-2">Story</p>
+                        <p class="font-bold text-lg text-slate-200">Launch History</p>
+                        <p class="text-sm text-slate-400">The challenges, successes, and key dates of India's space pioneers.</p>
+                    </div>
+
+                    <!-- Focus 4: Future -->
+                    <div class="p-6 bg-slate-900 rounded-xl shadow-xl border-b-4 border-b-green-400 transition hover:bg-slate-800">
+                        <p class="text-5xl font-extrabold text-green-400 mb-2">Goal</p>
+                        <p class="font-bold text-lg text-slate-200">Mission Objectives</p>
+                        <p class="text-sm text-slate-400">What science is being done and why it matters to the world.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Interactive Mission Storylines Section -->
+        <section id="portfolio" class="py-20 px-4 bg-slate-900/50">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-12">Mission Storylines: Decoding ISRO's Feats</h2>
+
+                <div class="flex justify-center mb-8 border-b border-slate-700">
+                    <button data-mission-id="chandrayaan" onclick="showMission('chandrayaan')" class="mission-tab px-6 py-3 text-sm md:text-base font-semibold border-b-4 transition duration-300">
+                        Chandrayaan-3: The Moon Landing
+                    </button>
+                    <button data-mission-id="mangalyaan" onclick="showMission('mangalyaan')" class="mission-tab px-6 py-3 text-sm md:text-base font-semibold border-b-4 transition duration-300">
+                        Mangalyaan: The Mars Orbiter
+                    </button>
+                    <button data-mission-id="gaganyaan" onclick="showMission('gaganyaan')" class="mission-tab px-6 py-3 text-sm md:text-base font-semibold border-b-4 transition duration-300">
+                        Gaganyaan: India's Crewed Mission
+                    </button>
+                </div>
+
+                <div class="bg-slate-900 p-8 rounded-xl shadow-2xl border border-orange-700/20">
+
+                    <!-- Content 1: Chandrayaan-3 (Storytelling tone) -->
+                    <div id="chandrayaan" class="mission-content">
+                        <h3 class="text-2xl font-bold text-teal-400 mb-4">Chandrayaan-3: The Gentle Descent</h3>
+                        <p class="text-slate-300 mb-6">
+                            This mission taught us about soft landings. Learn how Vikram-the lander used its powerful engines to slow down from orbital speed to a gentle touch on the South Pole of the Moon. We explain the '15 minutes of terror' in simple steps, covering the technology used for guidance and navigation.
+                        </p>
+                        <div class="grid md:grid-cols-3 gap-6 text-sm font-mono text-slate-400">
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">Key Facts:</p>
+                                <p>Lander: Vikram, Rover: Pragyan, Launch Date: July 14, 2023</p>
+                            </div>
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">The Science:</p>
+                                <p>Searching for water ice and studying the moon's surface composition.</p>
+                            </div>
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">Rocket Used:</p>
+                                <p>LVM3-M4 (India's heaviest operational launch vehicle).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content 2: Mangalyaan (Storytelling tone) -->
+                    <div id="mangalyaan" class="mission-content hidden">
+                        <h3 class="text-2xl font-bold text-teal-400 mb-4">Mangalyaan (MoM): India's First Visit to Mars</h3>
+                        <p class="text-slate-300 mb-6">
+                            Discover the incredible engineering feat of sending a satellite all the way to Mars using a unique, low-cost trajectory. We detail the long journey, the "slingshot" maneuver around Earth, and how the orbiter survived long periods of communication blackout in deep space.
+                        </p>
+                        <div class="grid md:grid-cols-3 gap-6 text-sm font-mono text-slate-400">
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">Key Facts:</p>
+                                <p>Objective: Technology demonstration and Martian surface studies.</p>
+                            </div>
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">The Science:</p>
+                                <p>Studying methane in the Martian atmosphere (a possible sign of life).</p>
+                            </div>
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">Launch Date:</p>
+                                <p>November 5, 2013 (PSLV-C25 rocket).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content 3: Gaganyaan (Storytelling tone) -->
+                    <div id="gaganyaan" class="mission-content hidden">
+                        <h3 class="text-2xl font-bold text-teal-400 mb-4">Gaganyaan: Preparing to Send Humans to Space</h3>
+                        <p class="text-slate-300 mb-6">
+                            This is India's most ambitious project: sending astronauts (Gaganauts) into orbit! Learn about the Crew Module, the crucial systems to keep the crew safe, and the intense testing required, including the emergency abort system designed to save lives in a split second.
+                        </p>
+                        <div class="grid md:grid-cols-3 gap-6 text-sm font-mono text-slate-400">
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">Key Facts:</p>
+                                <p>Target: 3 astronauts in Low Earth Orbit for up to 7 days.</p>
+                            </div>
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">The Science:</p>
+                                <p>Testing life support systems, astronaut training, and microgravity studies.</p>
+                            </div>
+                            <div class="p-3 border rounded-lg border-slate-800 bg-slate-950">
+                                <p class="text-orange-400 font-bold">Rocket Used:</p>
+                                <p>HLVM3 (Human-rated Launch Vehicle Mark 3).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-center mt-8 text-sm text-slate-600">
+                        Dive deeper into the engineering, physics, and history of each Indian space mission.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ROCKET BUILDER SIMULATOR SECTION (NEW) -->
+        <section id="simulator" class="py-24 px-4 bg-slate-950/80 border-t border-orange-800/30">
+            <div class="max-w-7xl mx-auto text-center">
+                <span class="text-orange-400 font-semibold uppercase tracking-widest mb-3 block">GET HANDS-ON</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold mb-4">The Rocket Builder: Design Your Own Satellite</h2>
+                <p class="text-xl text-slate-300 mb-8 max-w-3xl mx-auto">
+                    Drag and drop real components from ISRO missions like Chandrayaan and Mangalyaan to build and test your own launch vehicle. Understand mass, thrust, and stage separation!
+                </p>
+
+                <div class="simulator-grid mx-auto max-w-6xl mt-12">
+                    <!-- Rocket Parts Sidebar -->
+                    <div class="parts-sidebar text-left">
+                        <h3 class="text-lg font-bold text-white mb-4 border-b border-orange-700/50 pb-2">Available Parts</h3>
+                        <div id="part-list" class="space-y-3 text-sm text-slate-300">
+                            <!-- Placeholder parts (will become draggable elements in the next step) -->
+                            <div class="p-2 bg-slate-800 rounded-md cursor-pointer hover:bg-slate-700">LVM3 Booster (S200)</div>
+                            <div class="p-2 bg-slate-800 rounded-md cursor-pointer hover:bg-slate-700">Cryogenic Stage (C25)</div>
+                            <div class="p-2 bg-slate-800 rounded-md cursor-pointer hover:bg-slate-700">Liquid Core Stage (L110)</div>
+                            <div class="p-2 bg-slate-800 rounded-md cursor-pointer hover:bg-slate-700">Chandrayaan Payload</div>
+                            <div class="p-2 bg-slate-800 rounded-md cursor-pointer hover:bg-slate-700">Crew Module</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rocket Assembly Area -->
+                    <div id="assembly-workspace" class="assembly-area">
+                        Drag components here to start building your rocket!
+                    </div>
+                </div>
+
+                <button id="launch-button" class="mt-8 px-10 py-3 bg-red-600 text-slate-50 font-bold rounded-xl text-lg hover:bg-red-500 transition duration-300 shadow-lg shadow-red-500/50 cta-glow">
+                    Simulate Launch (Coming Soon)
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="p-6 text-center text-sm text-slate-600 bg-slate-950 border-t border-orange-800/20">
+        <p>&copy; 2025 Raven. Inspired by the incredible work of ISRO. Mission Intelligence for the Next Generation.</p>
+    </footer>
+
+    <script>
+        // --- MISSION PORTFOLIO TAB LOGIC ---
+        function showMission(missionId) {
+            document.querySelectorAll('.mission-content').forEach(block => {
+                block.classList.add('hidden');
+            });
+            document.querySelectorAll('.mission-tab').forEach(tab => {
+                tab.classList.remove('border-orange-500', 'text-orange-400', 'bg-slate-800');
+                tab.classList.add('border-slate-700', 'text-slate-400', 'hover:bg-slate-800/50');
+            });
+
+            const contentBlock = document.getElementById(missionId);
+            if (contentBlock) {
+                contentBlock.classList.remove('hidden');
+            }
+
+            const activeTab = document.querySelector(`[data-mission-id="${missionId}"]`);
+            if (activeTab) {
+                // Use orange colors for the active educational tab
+                activeTab.classList.add('border-orange-500', 'text-orange-400', 'bg-slate-800');
+                activeTab.classList.remove('border-slate-700', 'text-slate-400', 'hover:bg-slate-800/50');
+            }
+        }
+        
+        // --- DYNAMIC DASHBOARD DATA CYCLING (Adjusted for educational context) ---
+        const missions = [
+            {
+                title: "TRACKING: CHANDRAYAAN-3",
+                status: "Lander Orbit", time: "02:45:12",
+                data: ["<p class='text-orange-400'>Altitude: 100 km</p>", "Velocity: 1.6 km/s", "Mission Days: 13"]
+            },
+            {
+                title: "TRACKING: MANGALYAAN (MOM)",
+                status: "Cruise Phase", time: "18:03:45",
+                data: ["<p class='text-red-400'>Distance from Earth: 225M km</p>", "Solar Panel Health: Nominal", "Days in Orbit: 365+"]
+            },
+            {
+                title: "SIMULATION: GAGANYAAN",
+                status: "Pre-Launch Check", time: "00:00:10",
+                data: ["<p class='text-teal-400'>Crew Module Pressure: Stable</p>", "Abort System Status: Armed", "Liftoff T-10 seconds"]
+            }
+        ];
+
+        let currentMissionIndex = 0;
+        const titleHeader = document.getElementById('mission-title-header');
+        const statusHeader = document.getElementById('mission-status-header');
+        const dataOverlay = document.getElementById('data-overlay');
+
+        function updateDashboard() {
+            const mission = missions[currentMissionIndex];
+
+            // Update main status bar
+            titleHeader.textContent = mission.title;
+            statusHeader.textContent = `CURRENTLY TRACKING: ${mission.status} | T+ ${mission.time}`;
+
+            // Update data overlay 
+            dataOverlay.innerHTML = mission.data.map(item => `<p>${item}</p>`).join('');
+
+            // Cycle to the next mission state
+            currentMissionIndex = (currentMissionIndex + 1) % missions.length;
+        }
+
+        // --- THREE.JS ORBITAL SIMULATION LOGIC (REMAINS THE SAME) ---
+        const canvasContainer = document.getElementById('three-container');
+        let scene, camera, renderer;
+        let earth, satellite, orbitLine;
+        let mouseX = 0, mouseY = 0;
+        let isDragging = false;
+        let rotationX = 0, rotationY = 0;
+
+        function initThree() {
+            // This guardrail prevents initialization if the container hasn't rendered yet (clientHeight is 0)
+            if (!canvasContainer || canvasContainer.clientHeight === 0) {
+                 console.error("Canvas container not ready or has zero size.");
+                 return;
+            }
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+            renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            canvasContainer.appendChild(renderer.domElement);
+            renderer.domElement.style.position = 'absolute';
+            renderer.domElement.style.top = '0';
+            renderer.domElement.style.left = '0';
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffaa00, 1.5); // Warm light for a friendly glow
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            const earthGeometry = new THREE.SphereGeometry(4, 48, 48);
+            const earthMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x003366, 
+                wireframe: true, 
+                opacity: 0.6,
+                transparent: true
+            });
+            earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            scene.add(earth);
+
+            const orbitRadius = 7;
+            const points = [];
+            for (let i = 0; i <= 360; i++) {
+                const angle = (i / 360) * Math.PI * 2;
+                points.push(new THREE.Vector3(
+                    Math.cos(angle) * orbitRadius, 
+                    0, 
+                    Math.sin(angle) * orbitRadius
+                ));
+            }
+            const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const orbitMaterial = new THREE.LineBasicMaterial({ color: 0xffa500, linewidth: 2 }); // Orange line
+            orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
+            orbitLine.rotation.x = Math.PI / 4; 
+            scene.add(orbitLine);
+
+            const satelliteGeometry = new THREE.TetrahedronGeometry(0.7);
+            const satelliteMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xffa500, 
+                emissive: 0xffa500, 
+                emissiveIntensity: 0.8 
+            });
+            satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
+            scene.add(satellite);
+            
+            camera.position.z = 15;
+            camera.position.y = 5;
+            camera.lookAt(0, 0, 0);
+
+            canvasContainer.addEventListener('mousedown', onMouseDown, false);
+            canvasContainer.addEventListener('touchstart', onTouchStart, false);
+
+            document.addEventListener('mouseup', onMouseUp, false);
+            document.addEventListener('touchend', onMouseUp, false);
+            
+            document.addEventListener('mousemove', onMouseMove, false);
+            document.addEventListener('touchmove', onTouchMove, false);
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            if (renderer && canvasContainer) {
+                camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+            }
+        }
+
+        function onMouseDown(event) {
+            isDragging = true;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        }
+
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                isDragging = true;
+                mouseX = event.touches[0].clientX;
+                mouseY = event.touches[0].clientY;
+            }
+        }
+
+        function onMouseUp(event) {
+            isDragging = false;
+        }
+
+        function onMouseMove(event) {
+            handleMove(event.clientX, event.clientY);
+        }
+        
+        function onTouchMove(event) {
+            if (event.touches.length === 1) {
+                event.preventDefault(); 
+                handleMove(event.touches[0].clientX, event.touches[0].clientY);
+            }
+        }
+
+        function handleMove(clientX, clientY) {
+            if (isDragging) {
+                const deltaX = clientX - mouseX;
+                const deltaY = clientY - mouseY;
+
+                rotationY += deltaX * 0.005;
+                rotationX += deltaY * 0.005;
+
+                rotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationX));
+
+                mouseX = clientX;
+                mouseY = clientY;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (!renderer) return;
+
+            const time = Date.now() * 0.0005;
+            const orbitRadius = 7;
+            const orbitAngleOffset = Math.PI / 4; 
+
+            const satelliteOrbitX = Math.cos(time * 3) * orbitRadius;
+            const satelliteOrbitZ = Math.sin(time * 3) * orbitRadius;
+            
+            satellite.position.x = satelliteOrbitX;
+            satellite.position.z = satelliteOrbitZ * Math.cos(orbitAngleOffset);
+            satellite.position.y = satelliteOrbitZ * Math.sin(orbitAngleOffset);
+
+            satellite.rotation.y += 0.01;
+            
+            earth.rotation.y += 0.005;
+
+            if (!isDragging) {
+                rotationY += 0.001; 
+            }
+
+            const radius = 15;
+            camera.position.x = radius * Math.sin(rotationY) * Math.cos(rotationX);
+            camera.position.y = radius * Math.sin(rotationX);
+            camera.position.z = radius * Math.cos(rotationY) * Math.cos(rotationX);
+            camera.lookAt(0, 0, 0); 
+
+            renderer.render(scene, camera);
+        }
+        
+        // --- DOM Ready ---
+        function startApp() {
+            // 1. Initialize mission tabs (default to Chandrayaan)
+            showMission('chandrayaan'); 
+            
+            // 2. Initialize dashboard data cycling (every 4 seconds)
+            updateDashboard(); 
+            setInterval(updateDashboard, 4000); 
+
+            // 3. Initialize and start Three.js
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.remove(); 
+            
+            // FIX: Add a small delay to ensure the DOM has completed layout calculations 
+            // before checking container size and initializing Three.js. Increased from 10ms to 100ms for reliability.
+            setTimeout(() => {
+                initThree();
+                animate();
+                onWindowResize(); 
+            }, 100);
+        }
+
+        window.onload = startApp;
+    </script>
+</body>
+</html>
